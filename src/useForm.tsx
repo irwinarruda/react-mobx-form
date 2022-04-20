@@ -35,7 +35,7 @@ export const useForm = <InitialData extends Record<string, any>>({
     const onChange = (key: keyof InitialData) => {
         return (event: string | React.ChangeEvent<HTMLInputElement>) => {
             if (typeof event === 'string') {
-                form.current.onChange(key, event);
+                form.current.setValue(key, event);
             } else {
                 const { type, value } = (event.target ||
                     event.currentTarget) as HTMLInputElement;
@@ -45,8 +45,14 @@ export const useForm = <InitialData extends Record<string, any>>({
                     ? ((parsed = parseFloat(value)),
                       isNaN(parsed) ? '' : parsed)
                     : value;
-                form.current.onChange(key as any, val);
+                form.current.setValue(key as any, val);
             }
+        };
+    };
+
+    const onBlur = (key: keyof InitialData) => {
+        return (_: React.FocusEvent<HTMLInputElement>) => {
+            form.current.setTouchedFields(key);
         };
     };
 
@@ -55,7 +61,12 @@ export const useForm = <InitialData extends Record<string, any>>({
             name: key,
             value: form.current.values[key],
             onChange: onChange(key),
+            onBlur: onBlur(key),
         };
+    };
+
+    const reset = () => {
+        form.current.resetValues();
     };
 
     return {
